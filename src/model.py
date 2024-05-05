@@ -29,7 +29,6 @@ from PIL import Image, ImageOps
 import nilearn as nl
 import nibabel as nib
 import nilearn.plotting as nlplt
-import gif_your_nifti.core as gif2nif
 
 
 # ml libs
@@ -49,16 +48,25 @@ from tensorflow.keras.layers.experimental import preprocessing
 
 
 
-data_path = "../archive/BraTS2021_00621/"
-path = os.path.join(data_path, 'BraTS2021_00621_flair.nii.gz')
-
-img  = nib.load(path)
-nii_data = img.get_fdata()
-nii_aff  = img.affine
-nii_hdr  = img.header
-print(nii_aff ,'\n',nii_hdr)
-print(nii_data.shape)
+data_path = "../archive/BraTS2021_Training_Data/"
+scan_type = ("flair", "t1", "t1ce", "t2")
 
 
-display = nl.plotting.plot_img(img)
-nl.plotting.show()
+#reading scans of patients
+def load_patient(p_number):
+    for scan in scan_type:
+        idx = str(p_number).zfill(5)
+        path = f'{data_path}/BraTS2021_{idx}/BraTS2021_{idx}_{scan}.nii.gz'
+        img  = nib.load(path)
+    return 
+
+load_patient(0)
+# nii_data = img.get_fdata()
+# nii_aff  = img.affine
+# nii_hdr  = img.header
+# print(nii_aff ,'\n',nii_hdr)
+# print(nii_data.shape)
+
+
+# display = nl.plotting.plot_img(img)
+# nl.plotting.show()

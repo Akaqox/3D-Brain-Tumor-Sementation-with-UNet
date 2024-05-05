@@ -29,6 +29,7 @@ MANIFEST
 #DatasetFile
 archive.zip
 archive/
+base_dir/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
