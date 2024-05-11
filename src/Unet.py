@@ -10,7 +10,7 @@ kernel_initializer = 'he_uniform'  # Try others if you want
 def simple_unet_model(IMG_HEIGHT, IMG_WIDTH, IMG_DEPTH, IMG_CHANNELS, num_classes):
     # Build the model
     inputs = Input((IMG_HEIGHT, IMG_WIDTH, IMG_DEPTH, IMG_CHANNELS))
-    # s = Lambda(lambda x: x / 255)(inputs)   #No need for this if we normalize our inputs beforehand
+    s = Lambda(lambda x: x / 255)(inputs)   #No need for this if we normalize our inputs beforehand
     s = inputs
 
     # Contraction path

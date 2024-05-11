@@ -30,6 +30,8 @@ MANIFEST
 archive.zip
 archive/
 base_dir/
+*.keras
+*.h5
 *.m5.index
 *.m5.data-00000-of-00001
 # PyInstaller

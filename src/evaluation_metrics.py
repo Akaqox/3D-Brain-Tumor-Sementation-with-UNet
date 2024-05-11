@@ -5,7 +5,7 @@ Created on Thu May  9 21:34:07 2024
 
 @author: solauphoenix
 """
-import keras
+
 import keras.backend as K
 
 
@@ -22,20 +22,32 @@ def dice_coef(y_true, y_pred, epsilon=0.00001):
     dice_denominator = K.sum(y_true*y_true, axis=axis) + K.sum(y_pred*y_pred, axis=axis) + epsilon
     return K.mean((dice_numerator)/(dice_denominator))
 
-# inspired by https://github.com/keras-team/keras/issues/9395
+# # inspired by https://github.com/keras-team/keras/issues/9395
+# def dice_coef_necrotic(y_true, y_pred, epsilon=1e-6):
+#     intersection = K.sum(K.abs(y_true[0,:,:,:,1] * y_pred[0,:,:,:,1]))
+#     return (2. * intersection) / (K.sum(K.square(y_true[0,:,:,:,1])) + K.sum(K.square(y_pred[0,:,:,:,1])) + epsilon)
+
+# def dice_coef_edema(y_true, y_pred, epsilon=1e-6):
+#     intersection = K.sum(K.abs(y_true[0,:,:,:,2] * y_pred[0,:,:,:,2]))
+#     return (2. * intersection) / (K.sum(K.square(y_true[0,:,:,:,2])) + K.sum(K.square(y_pred[0,:,:,:,2])) + epsilon)
+
+# def dice_coef_enhancing(y_true, y_pred, epsilon=1e-6):
+#     intersection = K.sum(K.abs(y_true[0,:,:,:,3] * y_pred[0,:,:,:,3]))
+#     return (2. * intersection) / (K.sum(K.square(y_true[0,:,:,:,3])) + K.sum(K.square(y_pred[0,:,:,:,3])) + epsilon)
+
+import tensorflow as tf
+
 def dice_coef_necrotic(y_true, y_pred, epsilon=1e-6):
-    intersection = K.sum(K.abs(y_true[0,:,:,:,1] * y_pred[0,:,:,:,1]))
-    return (2. * intersection) / (K.sum(K.square(y_true[0,:,:,:,1])) + K.sum(K.square(y_pred[0,:,:,:,1])) + epsilon)
+    intersection = tf.reduce_sum(tf.abs(y_true[0,:,:,:,1] * y_pred[0,:,:,:,1]))
+    return (2. * intersection) / (tf.reduce_sum(tf.square(y_true[0,:,:,:,1])) + tf.reduce_sum(tf.square(y_pred[0,:,:,:,1])) + epsilon)
 
 def dice_coef_edema(y_true, y_pred, epsilon=1e-6):
-    intersection = K.sum(K.abs(y_true[0,:,:,:,2] * y_pred[0,:,:,:,2]))
-    return (2. * intersection) / (K.sum(K.square(y_true[0,:,:,:,2])) + K.sum(K.square(y_pred[0,:,:,:,2])) + epsilon)
+    intersection = tf.reduce_sum(tf.abs(y_true[0,:,:,:,2] * y_pred[0,:,:,:,2]))
+    return (2. * intersection) / (tf.reduce_sum(tf.square(y_true[0,:,:,:,2])) + tf.reduce_sum(tf.square(y_pred[0,:,:,:,2])) + epsilon)
 
 def dice_coef_enhancing(y_true, y_pred, epsilon=1e-6):
-    intersection = K.sum(K.abs(y_true[0,:,:,:,3] * y_pred[0,:,:,:,3]))
-    return (2. * intersection) / (K.sum(K.square(y_true[0,:,:,:,3])) + K.sum(K.square(y_pred[0,:,:,:,3])) + epsilon)
-
-
+    intersection = tf.reduce_sum(tf.abs(y_true[0,:,:,:,3] * y_pred[0,:,:,:,3]))
+    return (2. * intersection) / (tf.reduce_sum(tf.square(y_true[0,:,:,:,3])) + tf.reduce_sum(tf.square(y_pred[0,:,:,:,3])) + epsilon)
 
 # Computing Precision 
 def precision(y_true, y_pred):

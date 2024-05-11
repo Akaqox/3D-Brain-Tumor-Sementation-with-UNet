@@ -29,10 +29,8 @@ from tensorflow.keras.models import *
 from tensorflow.keras.layers import *
 from tensorflow.keras.optimizers import *
 from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping, TensorBoard
-from tensorflow.keras.layers.experimental import preprocessing
 
 #other python codes
-import model
 import data_generator as dg
 import evaluation_metrics as em
 
@@ -80,6 +78,7 @@ def pathListIntoIds(dirList):
 
 train_and_test_ids = pathListIntoIds(train_and_val_directories); 
     
+#should be reqwiewed
 train_test_ids, val_ids = train_test_split(train_and_test_ids,test_size=0.2) 
 train_ids, test_ids = train_test_split(train_test_ids,test_size=0.15) 
 print(val_ids)
@@ -101,32 +100,38 @@ callbacks = [keras.callbacks.EarlyStopping(monitor='loss', min_delta=0,
                                patience=2, verbose=1, mode='auto'),
       keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.2,
                               patience=2, min_lr=0.000001, verbose=1),
-      keras.callbacks.ModelCheckpoint(filepath = 'model_.{epoch:02d}-{val_loss:.6f}.m5',
+      keras.callbacks.ModelCheckpoint(filepath = 'model_.{epoch:02d}-{val_loss:.6f}.weights.h5',
                              verbose=1, save_best_only=True, save_weights_only = True),
       csv_logger
     ]
 
 
+from Unet import simple_unet_model
+
+model = simple_unet_model(IMG_HEIGHT=128,IMG_WIDTH=128,IMG_DEPTH=128,IMG_CHANNELS=1,num_classes=4)
 
 
 
-input_layer = Input((128,IMG_SIZE, IMG_SIZE, 2))
 
-model1 = model.Vnet_3d(input_layer)
-model1.compile(loss="categorical_crossentropy", optimizer=Adam(learning_rate=0.001), metrics = ['accuracy',tf.keras.metrics.MeanIoU(num_classes=4),
-                                                                                                                em.dice_coef_edema ,em.dice_coef_enhancing] )
 
-model1.summary()
+# input_layer = Input((128,IMG_SIZE, IMG_SIZE, 2))
 
-history =  model1.fit(training_generator,
-                     epochs=35,
-                     steps_per_epoch=len(train_ids),
-                     callbacks= callbacks,
-                     validation_data = valid_generator
-                     )  
-model1.save("model_vnet_2mod.h5")
+# model1 = model.Vnet_3d(input_layer)
+model.compile(loss="categorical_crossentropy", optimizer=Adam(learning_rate=0.001), metrics = ['accuracy',tf.keras.metrics.MeanIoU(num_classes=4),
+                                                                                                                 em.dice_coef_edema ,em.dice_coef_enhancing] )
 
-plot_model(model1, 
+model.summary()
+
+history =  model.fit(training_generator,
+                      epochs=1,
+                      # steps_per_epoch=len(train_ids)
+                      steps_per_epoch=100,
+                      callbacks= callbacks,
+                      validation_data = valid_generator
+                      )  
+model.save("model_Unet_2mod.h5")
+
+plot_model(model, 
            show_shapes = True,
            show_dtype=False,
            show_layer_names = True, 
@@ -135,8 +140,53 @@ plot_model(model1,
            dpi = 70)
 
 
+model1 = keras.models.load_model("model_vnet_2mod.h5")
 
 print("Evaluate on test data")
-results = model1.evaluate(test_generator, callbacks= callbacks)
-print("test loss, test acc:", results)
 
+X, y = test_generator.__getitem__(0)
+
+
+
+print("X boyutu:", X.shape)
+print("y boyutu:", y.shape)
+
+
+
+import random
+
+
+data = model1.predict(X)
+
+
+z_slice = 64
+
+
+z_slice_data = data[0, :, :, z_slice, 0]
+
+# Kesitleri görselleştir
+plt.figure(figsize=(15, 5))
+
+
+plt.subplot(224)
+plt.imshow(z_slice_data)
+plt.title('Z Slice')
+
+plt.show()
+
+data=y
+
+
+z_slice = 64
+
+
+z_slice_data = data[0, :, :, z_slice, 0]
+
+# Kesitleri görselleştir
+plt.figure(figsize=(15, 5))
+
+plt.subplot(224)
+plt.imshow(z_slice_data)
+plt.title('Z Slice')
+
+plt.show()
