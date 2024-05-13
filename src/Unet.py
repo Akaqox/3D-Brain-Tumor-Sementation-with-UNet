@@ -1,7 +1,6 @@
 from keras.models import Model
 from keras.layers import Input, Conv3D, MaxPooling3D, concatenate, Conv3DTranspose, BatchNormalization, Dropout, Lambda
-from keras.optimizers import Adam
-from keras.metrics import MeanIoU
+
 
 kernel_initializer = 'he_uniform'  # Try others if you want
 
@@ -66,8 +65,5 @@ def simple_unet_model(IMG_HEIGHT, IMG_WIDTH, IMG_DEPTH, IMG_CHANNELS, num_classe
     outputs = Conv3D(num_classes, (1, 1, 1), activation='softmax')(c9)
 
     model = Model(inputs=[inputs], outputs=[outputs])
-    # compile model outside of this function to make it flexible.
-    model.summary()
-
     return model
 

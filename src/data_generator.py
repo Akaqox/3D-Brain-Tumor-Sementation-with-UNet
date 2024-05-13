@@ -61,24 +61,23 @@ class DataGenerator(Sequence):
         # Initialization
         X = np.zeros((self.batch_size*VOLUME_SLICES, *self.dim))
         y = np.zeros((self.batch_size*VOLUME_SLICES, 128, 128))
-        Y = np.zeros((self.batch_size*VOLUME_SLICES, *self.dim, 4))
+        #Y = np.zeros((self.batch_size*VOLUME_SLICES, *self.dim, 4))
 
         
         # Generate data
         for c, i in enumerate(Batch_ids):
-            case_path = os.path.join(TRAIN_DATASET_PATH, i)
+            case_path = os.path.join(TRAIN_DATASET_PATH, str(i))
 
 
             data_path = os.path.join(case_path, f'{i}_flair.nii.gz');
             t1 = nib.load(data_path).get_fdata()
-            
             data_path = os.path.join(case_path, f'{i}_seg.nii.gz');
             seg = nib.load(data_path).get_fdata()
         
             for j in range(VOLUME_SLICES):
              X[j+(VOLUME_SLICES*c),:,:] = cv2.resize(t1[:,:,j+VOLUME_START_AT], (IMG_SIZE, IMG_SIZE))
 
-             y[j +VOLUME_SLICES*c,:,:] = cv2.resize(seg[:,:,j+VOLUME_START_AT], (IMG_SIZE, IMG_SIZE))
+             y[j+(VOLUME_SLICES*c),:,:] = cv2.resize(seg[:,:,j+VOLUME_START_AT], (IMG_SIZE, IMG_SIZE))
 
         X = X.reshape(1,128,128,128)
         y = y.reshape(1,128,128,128)
