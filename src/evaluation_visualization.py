@@ -75,6 +75,7 @@ def predict_ten(test_generator):
     
     
     model1 = keras.models.load_model("model_Unet_2mod.keras", custom_objects=custom_objects)
+    
     print("Evaluate on test data")
     
     for i in range(10):
