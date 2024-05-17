@@ -12,11 +12,12 @@ from sklearn.preprocessing import MinMaxScaler
 # %%
 scaler = MinMaxScaler()
 # %%
-TRAIN_DATASET_PATH = 'Bratask_unzipped/'
+TRAIN_DATASET_PATH = '../base_dir/train_ds/'
 # %%
-test_image_flair = nib.load(TRAIN_DATASET_PATH + 'BraTS2021_00000/BraTS2021_00000_flair.nii').get_fdata()
+test_image_flair = nib.load(TRAIN_DATASET_PATH + 'BraTS2021_00000/BraTS2021_00000_flair.nii.gz').get_fdata()
 print(test_image_flair.max())
 # %%
+
 print(test_image_flair.shape)
 # %%
 test_image_flair = scaler.fit_transform(test_image_flair.reshape(-1, test_image_flair.shape[-1])).reshape(
@@ -27,25 +28,28 @@ test_image_flair = scaler.fit_transform(test_image_flair.reshape(-1, test_image_
 print(test_image_flair.shape)
 # %%
 print(test_image_flair.max())
+print("this")
 # %%
-test_image_t1 = nib.load(TRAIN_DATASET_PATH + 'BraTS2021_00000/BraTS2021_00000_t1.nii').get_fdata()
+test_image_t1 = nib.load(TRAIN_DATASET_PATH + 'BraTS2021_00000/BraTS2021_00000_t1.nii.gz').get_fdata()
 test_image_t1 = scaler.fit_transform(test_image_t1.reshape(-1, test_image_t1.shape[-1])).reshape(test_image_t1.shape)
 
-test_image_t1ce = nib.load(TRAIN_DATASET_PATH + 'BraTS2021_00000/BraTS2021_00000_t1ce.nii').get_fdata()
+test_image_t1ce = nib.load(TRAIN_DATASET_PATH + 'BraTS2021_00000/BraTS2021_00000_t1ce.nii.gz').get_fdata()
 test_image_t1ce = scaler.fit_transform(test_image_t1ce.reshape(-1, test_image_t1ce.shape[-1])).reshape(
     test_image_t1ce.shape)
 
-test_image_t2 = nib.load(TRAIN_DATASET_PATH + 'BraTS2021_00000/BraTS2021_00000_t2.nii').get_fdata()
+test_image_t2 = nib.load(TRAIN_DATASET_PATH + 'BraTS2021_00000/BraTS2021_00000_t2.nii.gz').get_fdata()
 test_image_t2 = scaler.fit_transform(test_image_t2.reshape(-1, test_image_t2.shape[-1])).reshape(test_image_t2.shape)
 
-test_mask = nib.load(TRAIN_DATASET_PATH + 'BraTS2021_00000/BraTS2021_00000_seg.nii').get_fdata()
+test_mask = nib.load(TRAIN_DATASET_PATH + 'BraTS2021_00000/BraTS2021_00000_seg.nii.gz').get_fdata()
 test_mask = test_mask.astype(np.uint8)
 # %%
 print(np.unique(test_mask))
+print(test_mask.shape)
 
 # %%
 test_mask[test_mask == 4] = 3  # Reassign mask values 4 to 3
 print(np.unique(test_mask))
+print(test_mask.shape)
 # %%
 import random
 

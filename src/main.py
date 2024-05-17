@@ -24,7 +24,7 @@ import tensorflow as tf
 from tensorflow.keras.utils import plot_model
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report
+from sklearn import metrics as mtrc
 from tensorflow.keras.models import *
 from tensorflow.keras.layers import *
 from tensorflow.keras.optimizers import *
@@ -34,23 +34,11 @@ from keras.optimizers import Adam
 #other python codes
 import data_generator as dg
 import evaluation_metrics as em
-from Unet import simple_unet_model
+#from Unet import simple_unet_model
+import model as Unet
 import evaluation_visualization as ev
 
-image_path = "../base_dir/train_ds/BraTS2021_00495/BraTS2021_00495_seg.nii.gz"
-image_obj = nib.load(image_path)
-type(image_obj)
 
-image_data = image_obj.get_fdata()
-print(type(image_data))
-image_data.shape
-
-# classes_dict = {
-#     'Normal': 0.,
-#     'Edema': 1.,
-#     'Non-enhancing tumor': 2.,
-#     'Enhancing tumor': 3. 
-# }
 
 IMG_SIZE=128
 TRAIN_DATASET_PATH = '../base_dir/train_ds'
@@ -88,7 +76,7 @@ training_generator = dg.DataGenerator(train_ids)
 valid_generator = dg.DataGenerator(val_ids)
 test_generator = dg.DataGenerator(test_ids)
 
-
+print(type(training_generator.__len__))
 csv_logger = CSVLogger('training.log', separator=',', append=False)
 
 
@@ -102,16 +90,16 @@ callbacks = [
       csv_logger
     ]
 
-
-model = simple_unet_model(IMG_HEIGHT=128,IMG_WIDTH=128,IMG_DEPTH=128,IMG_CHANNELS=1,num_classes=4)
+input_layer = Input((128, IMG_SIZE, IMG_SIZE, 2))
+model = Unet.Unet_3d(input_img=input_layer, n_filters = 4, dropout = 0.2, batch_norm = True, num_classes = 4)
 
 
 
 # input_layer = Input((128,IMG_SIZE, IMG_SIZE, 2))
 
 model.compile(
-    loss="categorical_crossentropy", 
-    optimizer=Adam(learning_rate=0.001), 
+    loss= em.combinational_loss, 
+    optimizer=Adam(learning_rate=0.0005), 
     metrics = ['precision',
                 em.dice_coef,
                 em.dice_coef_edema ,
@@ -131,29 +119,38 @@ model.compile(
 #170 step size 30 epoch 0.001 step size (I saw that metric problem was due to running out the data)
 
 
-EPOCH = 60
-BATCH_SIZE = 170
+EPOCH = 40
+steps_per_epoch = 851
 
 history =  model.fit(training_generator,
                       epochs=EPOCH,
                       # steps_per_epoch=len(train_ids)
-                      steps_per_epoch=BATCH_SIZE,
+                      steps_per_epoch=steps_per_epoch,
                       callbacks= callbacks,
                       validation_data = valid_generator)  
 
 model.save("model_Unet_2mod.keras")
 # Evaluate your model's performance
 #will be added
-    
+
+custom_objects ={'combinational_loss' :  em.combinational_loss,
+                 'dice_coef': em.dice_coef, 
+                 'dice_coef_edema': em.dice_coef_edema, 
+                 'dice_coef_enhancing': em.dice_coef_enhancing,
+                 'dice_coef_necrotic': em.dice_coef_necrotic}
+   
+model1 = keras.models.load_model("model_Unet_2mod.keras", custom_objects=custom_objects)
+
+model1.evaluate(test_generator)
+
 ev.predict_ten(test_generator)
 
-
 ev.plot_performance_curve(history, 'loss', 'loss')
-ev.plt.savefig('../Plot/loss_curve ' + str(EPOCH) +' '+ str(BATCH_SIZE) + '.png', dpi=300)
+ev.plt.savefig('../Plot/loss_curve ' + str(EPOCH) +' '+ str(steps_per_epoch) + '.png', dpi=300)
 plt.clf()
 
 ev.plot_performance_curve(history, 'dice_coef_edema', 'dice_coef_edema')
 ev.plot_performance_curve(history, 'dice_coef_enhancing', 'dice_coef_enhancing')
 ev.plot_performance_curve(history, 'dice_coef_edema', 'dice_coef_edema')
 ev.plot_performance_curve(history, 'dice_coef_necrotic', 'dice_coef_necrotic')
-plt.savefig('../Plot/metrics ' + str(EPOCH) +' '+ str(BATCH_SIZE) + ' .png', dpi=300)
+plt.savefig('../Plot/metrics ' + str(EPOCH) +' '+ str(steps_per_epoch) + ' .png', dpi=300)
