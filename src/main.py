@@ -86,7 +86,7 @@ callbacks = [
       keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.2,
                                 patience=2, min_lr=0.000001, verbose=1),
       keras.callbacks.ModelCheckpoint(filepath = '../weights/model_.{epoch:02d}-{val_loss:.6f}.weights.h5',
-                              verbose=1, save_weights_only = True),
+                              verbose=1, save_best_only=True, save_weights_only = True),
       csv_logger
     ]
 

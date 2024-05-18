@@ -78,40 +78,40 @@ def predict_ten(test_generator):
     model1 = keras.models.load_model("model_Unet_2mod.keras", custom_objects=custom_objects)
     
     print("Evaluate on test data")
-    
-    X, y_real = test_generator.__getitem__(5)
-    
-    
-    print("y predicted shape:", y_real.shape)
-    print("X shape:", X.shape)
-    
-    
-    data = model1.predict(X)
-    data_real=y_real
-    
-    z_slice = 64
-    
-    z_slice_data = data[0, :, z_slice, :,1]
-    
-    z_slice_data_real = data_real[0, :, z_slice, :,1]
-    
-    print("X shape:", z_slice_data_real.shape)
-    # Create a single figure with two subplots
-    fig, (ax_input, ax_predicted, ax_real) = plt.subplots(nrows=1, ncols=3, figsize=(16, 6))
-    
-    # Plot input data
-    ax_input.imshow(X[0, :, z_slice, :,0], cmap='gray')
-    ax_input.set_title('Input')
-    
-    # Plot predicted data
-    ax_predicted.imshow(z_slice_data, cmap='gray')
-    ax_predicted.set_title('Predicted')
-    
-    # Plot real data
-    ax_real.imshow(z_slice_data_real, cmap='gray')
-    ax_real.set_title('Ground Truth')
-    
-    plt.subplots_adjust(wspace=-0.2)
-    plt.savefig('../Plot/predict/ ' + str(0) +' '+ str(current_time) + ' .png')
-    plt.show()
+    for i in range(10):
+        X, y_real = test_generator.__getitem__(i)
+        
+        
+        print("y predicted shape:", y_real.shape)
+        print("X shape:", X.shape)
+        
+        
+        data = model1.predict(X)
+        data_real=y_real
+        
+        z_slice = 64
+        
+        z_slice_data = data[0, :, :, z_slice,0]
+        
+        z_slice_data_real = data_real[0, :, :, z_slice,0]
+        
+        print("X shape:", z_slice_data_real.shape)
+        # Create a single figure with two subplots
+        fig, (ax_input, ax_predicted, ax_real) = plt.subplots(nrows=1, ncols=3, figsize=(16, 6))
+        
+        # Plot input data
+        ax_input.imshow(X[0, :, :, z_slice,1])
+        ax_input.set_title('Input')
+        
+        # Plot predicted data
+        ax_predicted.imshow(z_slice_data)
+        ax_predicted.set_title('Predicted')
+        
+        # Plot real data
+        ax_real.imshow(z_slice_data_real)
+        ax_real.set_title('Ground Truth')
+        
+        plt.subplots_adjust(wspace=0)
+        plt.savefig('../Plot/predict/ ' + str(i) +' '+ str(current_time) + ' .png')
+        plt.show()
 
