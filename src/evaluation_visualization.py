@@ -12,6 +12,13 @@ import matplotlib
 import random
 import time
 import evaluation_metrics as em
+import numpy as np
+
+IMG_START_AT=56
+IMG_SIZE=128
+TRAIN_DATASET_PATH = '../base_dir/train_ds'
+VOLUME_SLICES = 128 
+VOLUME_START_AT = 22
 
 # Plot (and save) the graphs of loss and metric values
 
@@ -78,7 +85,7 @@ def predict_ten(test_generator):
     model1 = keras.models.load_model("model_Unet_2mod.keras", custom_objects=custom_objects)
     
     print("Evaluate on test data")
-    for i in range(10):
+    for i in range(2):
         X, y_real = test_generator.__getitem__(i)
         
         
@@ -91,25 +98,42 @@ def predict_ten(test_generator):
         
         z_slice = 64
         
-        z_slice_data = data[0, :, :, z_slice,0]
+        # data_argmax = np.argmax(data, axis=-1)  # Find the class with the highest probability for each pixel
+
+        # # Resize the class labels back to the original image dimensions (if necessary)
+        # data = np.zeros_like(data, dtype=np.uint8)
+        # print(data.shape)
+        # data[: , :, :, :] = data_argmax
+       
+                
         
-        z_slice_data_real = data_real[0, :, :, z_slice,0]
-        
-        print("X shape:", z_slice_data_real.shape)
         # Create a single figure with two subplots
-        fig, (ax_input, ax_predicted, ax_real) = plt.subplots(nrows=1, ncols=3, figsize=(16, 6))
+        fig, (ax_input, ax_predicted, ax_real) = plt.subplots(nrows=1, ncols=3, figsize=(20, 6))
         
+    
         # Plot input data
-        ax_input.imshow(X[0, :, :, z_slice,1])
+        ax_input.imshow(X[0, :, :, z_slice,0])
         ax_input.set_title('Input')
         
-        # Plot predicted data
-        ax_predicted.imshow(z_slice_data)
-        ax_predicted.set_title('Predicted')
         
-        # Plot real data
-        ax_real.imshow(z_slice_data_real)
-        ax_real.set_title('Ground Truth')
+        for i, color in enumerate([ 'jet', 'jet', 'jet', 'jet']):
+            channel = data[0, :, :, z_slice, i]  # Access channel data (assuming starts from index 1)
+            ax_predicted.imshow(channel, cmap=color, alpha=0.6)
+            #ax_predicted.set_title(channel_title, fontsize=12)
+            fig.suptitle(f"Z-Slice {z_slice} (4 Channels)", fontsize=14)
+
+            # Add a main title or adjust spacing for better visualization
+        for i, color in enumerate(['jet', 'jet', 'jet', 'jet']):
+            
+            channel = data_real[0, :, :, z_slice, i]  # Access channel data (assuming starts from index 1)
+            ax_real.imshow(channel, cmap=color, alpha=0.6)
+            #ax_predicted.set_title(channel_title, fontsize=12)
+
+
+            # Add a main title or adjust spacing for better visualization
+        fig.suptitle(f"Z-Slice {z_slice} (4 Channels)", fontsize=14)
+        plt.tight_layout()
+        ax_real.set_title('Ground Truth')    
         
         plt.subplots_adjust(wspace=0)
         plt.savefig('../Plot/predict/ ' + str(i) +' '+ str(current_time) + ' .png')

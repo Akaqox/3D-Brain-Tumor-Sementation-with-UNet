@@ -73,13 +73,13 @@ class DataGenerator(tf.keras.utils.Sequence):
         for c, i in enumerate(Batch_ids):
             case_path = os.path.join(TRAIN_DATASET_PATH, i)
             
-            data_path = os.path.join(case_path, f'{i}_t2.nii.gz')
+            data_path = os.path.join(case_path, f'{i}_flair.nii.gz')
             t2 = nib.load(data_path).get_fdata()
             t2 = scaler.fit_transform(t2.reshape(-1, t2.shape[-1])).reshape(t2.shape)
             
-            data_path = os.path.join(case_path, f'{i}_t1ce.nii.gz')
-            t1ce = nib.load(data_path).get_fdata()
-            t1ce = scaler.fit_transform(t1ce.reshape(-1, t1ce.shape[-1])).reshape(t1ce.shape)
+            # data_path = os.path.join(case_path, f'{i}_t1ce.nii.gz')
+            # t1ce = nib.load(data_path).get_fdata()
+            # t1ce = scaler.fit_transform(t1ce.reshape(-1, t1ce.shape[-1])).reshape(t1ce.shape)
             
             data_path = os.path.join(case_path, f'{i}_seg.nii.gz')
             seg = nib.load(data_path).get_fdata()
@@ -87,12 +87,11 @@ class DataGenerator(tf.keras.utils.Sequence):
             seg = seg.astype(np.uint8)
             seg[seg == 4] = 3 
             # Load full volumes (assuming 3D data)
-            X = np.stack((
-                np.expand_dims(cv2.resize(t2[IMG_START_AT:IMG_START_AT+IMG_SIZE, IMG_START_AT:IMG_START_AT+IMG_SIZE, VOLUME_START_AT:VOLUME_START_AT + VOLUME_SLICES], self.dim[:2]), axis=0),
-                np.expand_dims(cv2.resize(t1ce[IMG_START_AT:IMG_START_AT+IMG_SIZE, IMG_START_AT:IMG_START_AT+IMG_SIZE, VOLUME_START_AT:VOLUME_START_AT + VOLUME_SLICES], self.dim[:2]), axis=0)
-                ), axis=-1)
+   #         X = np.stack((
+            X = np.expand_dims(np.expand_dims(cv2.resize(t2[IMG_START_AT:IMG_START_AT+IMG_SIZE, IMG_START_AT:IMG_START_AT+IMG_SIZE, VOLUME_START_AT:VOLUME_START_AT + VOLUME_SLICES], self.dim[:2]), axis=0), axis=-1)#,
+                # np.expand_dims(cv2.resize(t1ce[IMG_START_AT:IMG_START_AT+IMG_SIZE, IMG_START_AT:IMG_START_AT+IMG_SIZE, VOLUME_START_AT:VOLUME_START_AT + VOLUME_SLICES], self.dim[:2]), axis=0)
+    #            ), axis=-1)
                 # Resize the one-hot encoded mask to match input dimensions
-
             y = np.expand_dims(seg[IMG_START_AT:IMG_START_AT+IMG_SIZE, IMG_START_AT:IMG_START_AT+IMG_SIZE, VOLUME_START_AT:VOLUME_START_AT + VOLUME_SLICES], axis=0)           
             y  = to_categorical(y, num_classes=4)
             

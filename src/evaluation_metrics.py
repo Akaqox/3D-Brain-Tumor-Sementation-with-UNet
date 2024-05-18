@@ -39,6 +39,7 @@ def dice_coef_enhancing(y_true, y_pred, epsilon=0.00001):
 
 
 def tversky(y_true, y_pred):
+    y_true = K.cast(y_true, 'float32')
     y_true_pos = K.flatten(y_true)
     y_pred_pos = K.flatten(y_pred)
     true_pos = K.sum(y_true_pos * y_pred_pos)
@@ -49,4 +50,5 @@ def tversky(y_true, y_pred):
 
 #dice-coefs and tversky are combined with some coef
 def combinational_loss(y_true, y_pred):
-    return (1 - tversky(y_true,y_pred)) + (1 - dice_coef_necrotic(y_true, y_pred))*0.3 + (1 - dice_coef_enhancing(y_true, y_pred))*0.2 + (1 - dice_coef_edema(y_true, y_pred))*0.1 +(1 - dice_coef(y_true, y_pred))*0.1
+    y_true = K.cast(y_true, 'float32')
+    return (1 - tversky(y_true,y_pred)) #+ (1 - dice_coef_necrotic(y_true, y_pred))*0.3 + (1 - dice_coef_enhancing(y_true, y_pred))*0.2 + (1 - dice_coef_edema(y_true, y_pred))*0.1 +(1 - dice_coef(y_true, y_pred))*0.1

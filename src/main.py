@@ -14,7 +14,7 @@ from ipywidgets import interact, interactive, IntSlider, ToggleButtons
 import matplotlib.pyplot as plt
 from skimage.util import montage 
 from skimage.transform import rotate
-
+from datetime import datetime
 
 import seaborn as sns
 import keras
@@ -84,13 +84,13 @@ callbacks = [
       # keras.callbacks.EarlyStopping(monitor='loss', min_delta=0,
       #                          patience=2, verbose=1, mode='auto'),
       keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.2,
-                                patience=2, min_lr=0.000001, verbose=1),
+                                 patience=2, min_lr=0.0001, verbose=1),
       keras.callbacks.ModelCheckpoint(filepath = '../weights/model_.{epoch:02d}-{val_loss:.6f}.weights.h5',
                               verbose=1, save_best_only=True, save_weights_only = True),
       csv_logger
     ]
 
-input_layer = Input((128, IMG_SIZE, IMG_SIZE, 2))
+input_layer = Input((IMG_SIZE, IMG_SIZE, IMG_SIZE, 1))
 model = Unet.Unet_3d(input_img=input_layer, n_filters = 4, dropout = 0.2, batch_norm = True, num_classes = 4)
 
 
@@ -98,14 +98,18 @@ model = Unet.Unet_3d(input_img=input_layer, n_filters = 4, dropout = 0.2, batch_
 # input_layer = Input((128,IMG_SIZE, IMG_SIZE, 2))
 
 model.compile(
-    loss= em.combinational_loss, 
-    optimizer=Adam(learning_rate=0.0005), 
-    metrics = ['precision',
+    loss= 'categorical_crossentropy', 
+    optimizer=Adam(learning_rate=0.001), 
+    metrics = [
+
+                'accuracy',
+                'precision',
+                'recall',
+                em.combinational_loss,
                 em.dice_coef,
                 em.dice_coef_edema ,
                 em.dice_coef_enhancing,
                 em.dice_coef_necrotic])
-
 
 
 
@@ -119,8 +123,8 @@ model.compile(
 #170 step size 30 epoch 0.001 step size (I saw that metric problem was due to running out the data)
 
 
-EPOCH = 40
-steps_per_epoch = 851
+EPOCH = 10
+steps_per_epoch = 213
 
 history =  model.fit(training_generator,
                       epochs=EPOCH,
@@ -147,10 +151,20 @@ ev.predict_ten(test_generator)
 
 ev.plot_performance_curve(history, 'loss', 'loss')
 ev.plt.savefig('../Plot/loss_curve ' + str(EPOCH) +' '+ str(steps_per_epoch) + '.png', dpi=300)
+plt.show()
 plt.clf()
 
-ev.plot_performance_curve(history, 'dice_coef_edema', 'dice_coef_edema')
+ev.plot_performance_curve(history, 'accuracy', 'accuracy')
+ev.plot_performance_curve(history, 'precision', 'precision')
+ev.plot_performance_curve(history, 'recall', 'recall')
+plt.show()
+plt.savefig('../Plot/traditional-metrics ' + str(EPOCH) +' '+ str(datetime.today())+''+ str(steps_per_epoch) + ' .png', dpi=300)
+plt.clf()
+
+ev.plot_performance_curve(history, 'dice_coef', 'dice_coef')
 ev.plot_performance_curve(history, 'dice_coef_enhancing', 'dice_coef_enhancing')
 ev.plot_performance_curve(history, 'dice_coef_edema', 'dice_coef_edema')
 ev.plot_performance_curve(history, 'dice_coef_necrotic', 'dice_coef_necrotic')
-plt.savefig('../Plot/metrics ' + str(EPOCH) +' '+ str(steps_per_epoch) + ' .png', dpi=300)
+plt.show()
+plt.savefig('../Plot/dice-metrics ' + str(EPOCH) +' '+ str(steps_per_epoch) + ' .png', dpi=300)
+plt.clf()
